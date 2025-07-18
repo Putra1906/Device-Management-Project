@@ -1,16 +1,71 @@
-from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_cors import CORS
+import sqlite3
 from datetime import datetime
 from dummy import setup_database
-from flask import Flask, render_template, request, redirect, url_for
 
+# Inisialisasi Aplikasi Flask
 app = Flask(__name__)
+
+# Mengaktifkan CORS untuk semua domain
+CORS(app)
+
 DB_NAME = "database.db"
 
-# Panggil fungsi setup database di sini
-# Ini akan memastikan database dan tabel dibuat saat aplikasi pertama kali dimulai
+# Menjalankan setup database saat aplikasi pertama kali dimulai
 setup_database()
+
+# Route untuk Login API
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return jsonify({"error": "Username and password are required"}), 400
+
+        # Validasi hardcoded
+        if username == 'admin' and password == 'admin':
+            return jsonify({
+                "success": True,
+                "message": "Login successful"
+            })
+        else:
+            return jsonify({
+                "error": "Incorrect username or password"
+            }), 401
+    except Exception as e:
+        # Menangani error jika request body bukan JSON
+        return jsonify({"error": "Invalid request format"}), 400
+
+# Route untuk mendapatkan semua device (ini bisa digunakan oleh dashboard)
+@app.route('/api/devices', methods=['GET'])
+def get_devices():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM devices")
+    devices = cursor.fetchall()
+    conn.close()
+    
+    # Mengubah data menjadi format JSON yang bisa dibaca frontend
+    devices_list = []
+    for device in devices:
+        devices_list.append({
+            "id": device[0],
+            "name": device[1],
+            "ip_address": device[2],
+            "location": device[3],
+            "status": device[4],
+            "detected_at": device[5],
+            "latitude": device[6],
+            "longitude": device[7]
+        })
+    return jsonify({"devices": devices_list})
+    
+# Catatan: Route lainnya seperti /add, /edit, dll, adalah untuk template HTML 
+# dan tidak dipanggil oleh frontend Next.js Anda. Mereka bisa dibiarkan saja.
 
 @app.route('/')
 def index():
@@ -55,22 +110,6 @@ def add_device():
         return redirect(url_for('index'))
     return render_template('add.html')
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    # Validasi hardcoded
-    if username == 'admin' and password == 'admin':
-        return {
-            "success": True,
-            "message": "Login successful"
-        }
-    else:
-        return {
-            "error": "Incorrect username or password"
-        }, 401
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_device(id):
@@ -107,5 +146,3 @@ def delete_device(id):
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
-
-# Blok if __name__ == '__main__' tidak lagi dibutuhkan untuk deployment
