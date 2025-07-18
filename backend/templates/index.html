@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cyber Threat Device Monitor</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body class="table-page">
+    <h1>Cyber Threat Device Monitor</h1>
+    <a href="{{ url_for('add_device') }}">➕ Tambah Perangkat</a>
+    <form
+      method="get"
+      action="{{ url_for('index') }}"
+      class="search-form"
+      style="margin-bottom: 20px"
+    >
+      <input
+        type="text"
+        name="q"
+        placeholder="🔍 Cari perangkat..."
+        value="{{ keyword }}"
+        style="padding: 8px; border-radius: 6px; border: 1px solid #ccc"
+      />
+      <button
+        type="submit"
+        style="
+          padding: 8px 12px;
+          border-radius: 6px;
+          background-color: #2980b9;
+          color: white;
+          border: none;
+        "
+      >
+        Cari
+      </button>
+    </form>
+
+    <table>
+      <tr>
+        <th>NO</th>
+        <th>Nama Device</th>
+        <th>IP Address</th>
+        <th>Lokasi</th>
+        <th>Status</th>
+        <th>Detected At</th>
+        <th>Aksi</th>
+      </tr>
+      {% for device in devices %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ device[1] }}</td>
+        <td>{{ device[2] }}</td>
+        <td>{{ device[3] }}</td>
+        <td>
+          {% if device[4].lower() == 'allowed' %}
+          <span class="status-badge status-allowed">Allowed</span>
+          {% elif device[4].lower() == 'blocked' %}
+          <span class="status-badge status-blocked">Blocked</span>
+          {% elif device[4].lower() == 'maintenance' %}
+          <span class="status-badge status-maintenance">Maintenance</span>
+          {% else %}
+          <span class="status-badge status-unknown">{{ device[4] }}</span>
+          {% endif %}
+        </td>
+        <td>{{ device[5] }}</td>
+        <td>
+          <a href="{{ url_for('edit_device', id=device[0]) }}">Edit</a> |
+          <a href="{{ url_for('delete_device', id=device[0]) }}">Hapus</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <!-- PETA -->
+    <h2 style="margin-top: 50px">📍 Peta Lokasi Perangkat</h2>
+    <div id="map" style="height: 400px; width: 90%; margin-bottom: 50px"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+      var map = L.map('map').setView([-6.9147, 107.6098], 12);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const keyword = "{{ keyword }}".toLowerCase();
+      let matchedMarker = null;
+
+      const devices = [
+        {% for device in devices %}
+          {% if device[6] and device[7] %}
+            {
+              name: `{{ device[1] }}`,
+              ip: `{{ device[2] }}`,
+              status: `{{ device[4] }}`,
+              lat: {{ device[6]|float }},
+              lng: {{ device[7]|float }}
+            },
+          {% endif %}
+        {% endfor %}
+      ];
+
+      devices.forEach((d) => {
+        const marker = L.marker([d.lat, d.lng])
+          .addTo(map)
+          .bindPopup(`<b>${d.name}</b><br>IP: ${d.ip}<br>Status: ${d.status}`);
+
+        if (
+          keyword &&
+          (d.name.toLowerCase().includes(keyword) ||
+            d.ip.toLowerCase().includes(keyword) ||
+            d.status.toLowerCase().includes(keyword))
+        ) {
+          matchedMarker = marker;
+        }
+      });
+
+      if (matchedMarker) {
+        matchedMarker.openPopup();
+        map.setView(matchedMarker.getLatLng(), 16);
+      }
+    </script>
+  </body>
+</html>
