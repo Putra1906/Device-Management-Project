@@ -1,28 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
+from dummy import setup_database
 
 app = Flask(__name__)
 DB_NAME = "database.db"
-
-# Inisialisasi database
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS devices (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            ip_address TEXT NOT NULL,
-            location TEXT,
-            status TEXT,
-            detected_at TEXT,
-            latitude REAL,
-            longitude REAL
-        )
-    """)
-    conn.commit()
-    conn.close()
 
 @app.route('/')
 def index():
@@ -104,5 +86,5 @@ def delete_device(id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    init_db()
+    setup_database()
     app.run(debug=True)
