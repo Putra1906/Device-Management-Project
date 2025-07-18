@@ -3,6 +3,7 @@ import sqlite3
 from flask_cors import CORS
 from datetime import datetime
 from dummy import setup_database
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 DB_NAME = "database.db"
@@ -53,6 +54,23 @@ def add_device():
         conn.close()
         return redirect(url_for('index'))
     return render_template('add.html')
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    # Validasi hardcoded
+    if username == 'admin' and password == 'admin':
+        return {
+            "success": True,
+            "message": "Login successful"
+        }
+    else:
+        return {
+            "error": "Incorrect username or password"
+        }, 401
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit_device(id):
