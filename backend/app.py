@@ -6,6 +6,10 @@ from dummy import setup_database
 app = Flask(__name__)
 DB_NAME = "database.db"
 
+# Panggil fungsi setup database di sini
+# Ini akan memastikan database dan tabel dibuat saat aplikasi pertama kali dimulai
+setup_database()
+
 @app.route('/')
 def index():
     keyword = request.args.get('q', '').lower()
@@ -85,6 +89,4 @@ def delete_device(id):
     conn.close()
     return redirect(url_for('index'))
 
-if __name__ == '__main__':
-    setup_database()
-    app.run(debug=True)
+# Blok if __name__ == '__main__' tidak lagi dibutuhkan untuk deployment
