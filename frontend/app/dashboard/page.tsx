@@ -55,7 +55,7 @@ export default function Dashboard() {
 
   const fetchDevices = async (keyword = "") => {
     try {
-      const url = keyword ? `${process.env.NEXT_PUBLIC_API_URL}/api/devices?q=${encodeURIComponent(keyword)}` : `${process.env.NEXT_PUBLIC_API_URL}/api/devices`
+      const url = keyword ? `${process.env.NEXT_PUBLIC_API_URL}/api/devices?q=${encodeURIComponent(keyword)}` : `${process.env.NEXT_PUBLIC_API_URL}/api/devices`;
       const response = await fetch(url)
       const data = await response.json()
       setDevices(data.devices || [])
@@ -86,7 +86,7 @@ export default function Dashboard() {
     if (!confirm("Are you sure you want to delete this device?")) return
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/devices/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "DELETE",
       })
 
@@ -103,7 +103,7 @@ export default function Dashboard() {
 
   const handleStatusUpdate = async (deviceId: number, newStatus: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/devices/${deviceId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

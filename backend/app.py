@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+from flask_cors import CORS
 from datetime import datetime
 from dummy import setup_database
 

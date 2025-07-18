@@ -55,7 +55,7 @@ export default function EditDevice() {
     try {
       console.log("Fetching device with ID:", deviceId)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/devices/${deviceId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -165,7 +165,7 @@ export default function EditDevice() {
       console.log("Submitting update for device:", deviceId)
       console.log("Form data:", formData)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/devices/${deviceId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
