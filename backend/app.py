@@ -1,54 +1,28 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
-from flask_socketio import SocketIO, emit
-from vercel_kv import kv  # Menggunakan library Vercel KV
+from vercel_kv import kv
 
-# Inisialisasi Aplikasi Flask dan SocketIO
+# Inisialisasi Aplikasi Flask
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret-key-for-production'
-socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
 
-# --- Helper Functions untuk Real-time dengan Vercel KV ---
+# --- Helper Function ---
 def get_all_devices_from_db():
-    """Mengambil semua data perangkat dari Vercel KV."""
     try:
         all_devices_dict = kv.hgetall('devices')
         if not all_devices_dict:
             return []
-        devices_list = [
-            {
-                "ip_address": ip,
-                **details
-            }
-            for ip, details in all_devices_dict.items()
-        ]
-        # Mengurutkan berdasarkan 'detected_at' dari yang terbaru
+        devices_list = [{"ip_address": ip, **details} for ip, details in all_devices_dict.items()]
         return sorted(devices_list, key=lambda d: d.get('detected_at', ''), reverse=True)
     except Exception as e:
         print(f"Error fetching from Vercel KV: {e}")
         return []
 
-def broadcast_update():
-    """Mengambil data terbaru dan mengirimkannya ke semua client."""
-    devices = get_all_devices_from_db()
-    socketio.emit('update', {'devices': devices})
-    print("Broadcasted data update to all clients.")
-
-# --- SocketIO Event Handlers ---
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-    broadcast_update()
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-
 # --- API Routes ---
 @app.route('/api/login', methods=['POST'])
 def login():
+    # ... (Fungsi ini tidak berubah)
     try:
         data = request.get_json()
         username = data.get('username')
@@ -64,6 +38,7 @@ def login():
 
 @app.route('/api/devices', methods=['GET'])
 def get_devices():
+    """Endpoint ini sekarang menjadi sumber data utama untuk dashboard."""
     devices_list = get_all_devices_from_db()
     return jsonify({"devices": devices_list})
 
@@ -85,9 +60,9 @@ def agent_report():
                 'linked_area': device.get('linked_area', 'Internal-LAN')
             }
             pipe.hset('devices', {ip: device_data})
-
+        
         pipe.execute()
-        broadcast_update()
+        # Tidak ada lagi broadcast, tugas server selesai di sini.
         return jsonify({"success": True, "message": "Report received and processed."})
 
     except Exception as e:
