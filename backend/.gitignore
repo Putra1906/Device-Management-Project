@@ -29,6 +29,7 @@ next-env.d.ts
 database.db
 
 # Python
+/venv/
 /backend/venv/
 /backend/__pycache__/
 /backend/uploads/
