@@ -5,7 +5,7 @@ import json
 from ipaddress import ip_address
 
 # Konfigurasi
-SERVER_URL = "http://127.0.0.1:5000/api/agent/report"
+SERVER_URL = "https://device-management-project.vercel.app/api/agent/report"
 NETWORK_CIDR = "192.168.1.0/24"  # Ganti dengan rentang jaringan Anda
 SCAN_INTERVAL_SECONDS = 60  # Pindai setiap 60 detik
 
