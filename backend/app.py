@@ -71,8 +71,18 @@ def get_all_devices_from_db():
 # --- API Routes ---
 @app.route('/api/login', methods=['POST'])
 def login():
-    # ... (Kode login tidak perlu diubah)
-    return jsonify({"success": True, "message": "Login successful"})
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        if not username or not password:
+            return jsonify({"error": "Username and password are required"}), 400
+        if username == 'admin' and password == 'admin':
+            return jsonify({"success": True, "message": "Login successful"})
+        else:
+            return jsonify({"error": "Incorrect username or password"}), 401
+    except Exception:
+        return jsonify({"error": "Invalid request format"}), 400
 
 @app.route('/api/devices', methods=['GET'])
 def get_devices():
