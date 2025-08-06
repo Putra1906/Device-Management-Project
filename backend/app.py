@@ -9,6 +9,7 @@ CORS(app)
 
 # --- Helper Function ---
 def get_all_devices_from_db():
+    """Mengambil semua data perangkat dari Vercel KV."""
     try:
         all_devices_dict = kv.hgetall('devices')
         if not all_devices_dict:
@@ -22,7 +23,6 @@ def get_all_devices_from_db():
 # --- API Routes ---
 @app.route('/api/login', methods=['POST'])
 def login():
-    # ... (Fungsi ini tidak berubah)
     try:
         data = request.get_json()
         username = data.get('username')
@@ -38,7 +38,7 @@ def login():
 
 @app.route('/api/devices', methods=['GET'])
 def get_devices():
-    """Endpoint ini sekarang menjadi sumber data utama untuk dashboard."""
+    """Endpoint ini menjadi sumber data utama untuk dashboard."""
     devices_list = get_all_devices_from_db()
     return jsonify({"devices": devices_list})
 
@@ -62,7 +62,6 @@ def agent_report():
             pipe.hset('devices', {ip: device_data})
         
         pipe.execute()
-        # Tidak ada lagi broadcast, tugas server selesai di sini.
         return jsonify({"success": True, "message": "Report received and processed."})
 
     except Exception as e:
