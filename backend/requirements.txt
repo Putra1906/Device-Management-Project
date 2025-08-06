@@ -1,3 +1,8 @@
 Flask
 gunicorn
 Flask-Cors
+pandas
+openpyxl
+Flask-SocketIO
+python-nmap
+requests 
