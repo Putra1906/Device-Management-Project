@@ -1,8 +1,6 @@
 Flask
-gunicorn
 Flask-Cors
 pandas
 openpyxl
 python-nmap
 requests
-vercel-kv
